@@ -31,7 +31,7 @@ const parseSequence = (
   return round(min);
 };
 
-let highestId = 0;
+const ids: number[] = [];
 
 for (const sequence of input) {
   const row = parseSequence(
@@ -53,11 +53,20 @@ for (const sequence of input) {
 
   const id = row * 8 + column;
 
-  if (id > highestId) {
-    highestId = id;
-  }
+  // if (row !== 0 && row !== 127) {
+  ids.push(id);
+  // }
 }
 
-console.log(highestId);
+const sortedIds = ids.sort();
+for (let i = 0; i < sortedIds.length; i++) {
+  const id = sortedIds[i];
+  const nextId = sortedIds[i + 1];
+
+  if (nextId - id !== 1) {
+    console.log(id + 1);
+    Deno.exit();
+  }
+}
 
 export {};
