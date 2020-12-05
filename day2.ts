@@ -25,11 +25,11 @@ const input: Password[] = (await Deno.readTextFile("./data/day2.txt"))
     };
   });
 
-const isValid = (pw: Password): boolean => {
-  const rx = new RegExp(pw.policy.letter, "g");
-  const letterCount = pw.password.match(rx)?.length || 0;
+const isValid = (pw: Password): number => {
+  const matchA = pw.password[pw.policy.min - 1] === pw.policy.letter;
+  const matchB = pw.password[pw.policy.max - 1] === pw.policy.letter;
 
-  return letterCount >= pw.policy.min && letterCount <= pw.policy.max;
+  return +matchA ^ +matchB;
 };
 
 let count = 0;
@@ -37,9 +37,7 @@ let count = 0;
 for (let i = 0; i < input.length; i++) {
   const element = input[i];
 
-  if (isValid(element)) {
-    count++;
-  }
+  count += isValid(element);
 }
 
 console.log(count);
