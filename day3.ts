@@ -3,6 +3,11 @@ declare type Position = {
   y: number;
 };
 
+declare type Strategy = {
+  right: number;
+  down: number;
+};
+
 const input: boolean[][] = (await Deno.readTextFile("./data/day3.txt"))
   .split("\n")
   .map((s) => [...s].map((c) => c === "#"));
@@ -16,10 +21,10 @@ const hasTree = (position: Position): boolean => {
   return row[x];
 };
 
-const traverse = (currentPos: Position): Position | null => {
+const traverse = (currentPos: Position, strat: Strategy): Position | null => {
   const newPosition = {
-    y: currentPos.y + 1,
-    x: currentPos.x + 3,
+    y: currentPos.y + strat.down,
+    x: currentPos.x + strat.right,
   } as Position;
 
   if (newPosition.y >= input.length) {
@@ -29,17 +34,35 @@ const traverse = (currentPos: Position): Position | null => {
   return newPosition;
 };
 
-let currentPosition: Position | null = { x: 0, y: 0 } as Position;
-let count = 0;
+const strategies: Strategy[] = [
+  { right: 1, down: 1 },
+  { right: 3, down: 1 },
+  { right: 5, down: 1 },
+  { right: 7, down: 1 },
+  { right: 1, down: 2 },
+];
 
-while (currentPosition) {
-  currentPosition = traverse(currentPosition);
+let result = 1;
 
-  if (currentPosition && hasTree(currentPosition)) {
-    count++;
+for (let i = 0; i < strategies.length; i++) {
+  const strat = strategies[i];
+
+  let currentPosition: Position | null = { x: 0, y: 0 } as Position;
+  let count = 0;
+
+  while (currentPosition) {
+    currentPosition = traverse(currentPosition, strat);
+
+    if (currentPosition && hasTree(currentPosition)) {
+      count++;
+    }
   }
+
+  console.log(strat, count);
+
+  result *= count;
 }
 
-console.log(count);
+console.log(result);
 
 export {};
