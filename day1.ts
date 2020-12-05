@@ -4,11 +4,11 @@ const input: number[] = (await Deno.readTextFile("./data/day1.txt"))
 
 const targetSum = 2020;
 
-for (let j = 0; j < input.length; j++) {
+for (let j = 0; j < input.length - 2; j++) {
   const _targetSum = targetSum - input[j];
   const cache: number[] = [];
 
-  for (let i = 0; i < input.length; i++) {
+  for (let i = j + 1; i < input.length; i++) {
     const element = input[i];
 
     if (cache.includes(_targetSum - element)) {
