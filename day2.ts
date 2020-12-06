@@ -6,20 +6,15 @@ declare type Password = {
 const input: Password[] = (await Deno.readTextFile("./data/day2.txt"))
   .split("\n")
   .map((s) => {
-    const a = s.split(":");
-    const b = a[0].split(" ");
-    const c = b[0].split("-");
-
-    const letter = b[1];
-    const password = a[1].trim();
-    const min = Number(c[0]);
-    const max = Number(c[1]);
+    // 17-19 f: cnffsfffzhfnsffttms
+    const [, min, max, letter, password] =
+      /^(\d+)-(\d+) (\w{1}): (\w+)$/.exec(s) || [];
 
     return {
       policy: {
         letter,
-        min,
-        max,
+        min: +min,
+        max: +max,
       },
       password,
     };
