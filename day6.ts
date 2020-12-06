@@ -14,7 +14,9 @@ for (const group of input) {
   }
 
   for (const question in localAnswerMap) {
-    answerMap[question] = answerMap[question] + 1 || 1;
+    if (localAnswerMap[question] === group.length) {
+      answerMap[question] = answerMap[question] + 1 || 1;
+    }
   }
 }
 
