@@ -3,6 +3,7 @@ const input: string[] = (await Deno.readTextFile("./data/day7.txt")).split(
 );
 
 const containerMap: { [key: string]: string[] } = {};
+const bags: { [key: string]: { [key: string]: number } } = {};
 
 for (const line of input) {
   if (!line) {
@@ -22,6 +23,7 @@ for (const line of input) {
       };
     });
 
+  // build container map
   for (const value of values) {
     if (!containerMap[value.key]) {
       containerMap[value.key] = [];
@@ -31,6 +33,14 @@ for (const line of input) {
       containerMap[value.key].push(key);
     }
   }
+
+  // build containing map
+  bags[key] = values.reduce((prev, curr) => {
+    return {
+      ...prev,
+      [curr.key]: curr.value,
+    };
+  }, {});
 }
 
 function findContainers(bag: string): string[] {
@@ -44,7 +54,20 @@ function findContainers(bag: string): string[] {
   return containers;
 }
 
-const containers = findContainers("shiny gold");
-const containersSet = new Set(containers);
+function countContent(bag: string): number {
+  let count = 0;
 
-console.log(containersSet.size);
+  for (const childBag in bags[bag]) {
+    const numChildBags = bags[bag][childBag];
+
+    count += numChildBags + numChildBags * countContent(childBag);
+  }
+
+  return count;
+}
+
+// const containers = findContainers("shiny gold");
+// const containersSet = new Set(containers);
+
+// console.log(containersSet.size);
+console.log(countContent("shiny gold"));
