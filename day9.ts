@@ -1,4 +1,4 @@
-const input: number[] = (await Deno.readTextFile("./data/day8.txt"))
+const input: number[] = (await Deno.readTextFile("./data/day9.txt"))
   .split("\n")
   .filter((s) => !!s)
   .map((s) => Number(s));
