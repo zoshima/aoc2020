@@ -38,7 +38,7 @@ inline bool IsOccupied(const SeatMap &spots, int x, int y) {
   return spots[y][x] == kOccupiedSeat;
 }
 
-inline int NumOccupiedAdjuscent(const SeatMap &spots, int x, int y) {
+inline int NumOccupiedAdjacent(const SeatMap &spots, int x, int y) {
   int numOccupied = 0;
 
   numOccupied += IsOccupied(spots, x - 1, y);     // west
@@ -58,12 +58,12 @@ void UpdateState(const SeatMap &spots, int x, int y) {
   case kFloor:
     break;
   case kEmptySeat:
-    if (!NumOccupiedAdjuscent(spots, x, y)) {
+    if (!NumOccupiedAdjacent(spots, x, y)) {
       input[y][x] = kOccupiedSeat;
     }
     break;
   case kOccupiedSeat:
-    if (NumOccupiedAdjuscent(spots, x, y) >= 4) {
+    if (NumOccupiedAdjacent(spots, x, y) >= 4) {
       input[y][x] = kEmptySeat;
     }
     break;
