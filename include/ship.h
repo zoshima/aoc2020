@@ -1,6 +1,8 @@
 #pragma once
 
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <unordered_map>
 
 constexpr char kNorth = 'N';
@@ -13,95 +15,112 @@ constexpr char kForward = 'F';
 
 class Ship {
 public:
-  Ship(char _heading) {
-    heading = _heading;
-    xoff = 0;
-    yoff = 0;
-
-    switch (heading) {
-    case kEast:
-      bearing = 90;
-      break;
-    case kSouth:
-      bearing = 180;
-      break;
-    case kWest:
-      bearing = 260;
-      break;
-    default:
-      bearing = 0;
-    }
+  Ship() {
+    shipPos = std::make_pair(0, 0);
+    waypointPos = std::make_pair(10, 1);
   }
 
-  void ProcessInstruction(const char direction, const int magnitude) {
-    switch (direction) {
+  void ProcessInstruction(const char action, const uint value) {
+    switch (action) {
+    case kNorth:
+      MoveWaypoint(false, value);
+      break;
+    case kSouth:
+      MoveWaypoint(false, -1 * value);
+      break;
+    case kEast:
+      MoveWaypoint(true, value);
+      break;
+    case kWest:
+      MoveWaypoint(true, -1 * value);
+      break;
     case kLeft:
-      Rotate(-1 * magnitude);
+      RotateWaypointCCW(value); 
       break;
     case kRight:
-      Rotate(magnitude);
+      RotateWaypointCW(value);
       break;
     case kForward:
-      Move(heading, magnitude);
+      MoveShip(value);
       break;
-    default:
-      Move(direction, magnitude);
     }
   }
 
   void Print() {
-    int north = yoff < 0 ? abs(yoff) : 0;
-    int south = yoff >= 0 ? yoff : 0;
-    int west = xoff < 0 ? abs(xoff) : 0;
-    int east = xoff >= 0 ? xoff : 0;
-
-    int manhd = north + south + west + east;
-
-    std::cout << north << "N " << west << "W " << south << "S " << east
-              << "E, heading " << heading << ", bearing " << bearing << ", " << manhd << "manhd"
-              << std::endl;
+    std::cout << "SHIP: " << ToString(shipPos) << std::endl;
+    std::cout << "WAYPOINT: " << ToString(waypointPos) << std::endl;
   }
 
 private:
-  char heading; // compass direction
-  int bearing;  // degree offset
-  int xoff;
-  int yoff;
+  std::pair<int, int> shipPos;     // x, y
+  std::pair<int, int> waypointPos; // x, y
 
-  void Move(const char dir, int magnitude) {
-    switch (dir) {
-    case kNorth:
-      yoff -= magnitude;
-      break;
-    case kSouth:
-      yoff += magnitude;
-      break;
-    case kWest:
-      xoff -= magnitude;
-      break;
-    case kEast:
-      xoff += magnitude;
-      break;
+  void MoveShip(const int value) {
+    shipPos.first += value * waypointPos.first;
+    shipPos.second += value * waypointPos.second;
+  }
+
+  void MoveWaypoint(const bool isHorizontal, const int value) {
+    if (isHorizontal) {
+      waypointPos.first += value;
+    } else {
+      waypointPos.second += value;
     }
   }
 
-  void Rotate(int degrees) {
-    bearing += degrees;
-
-    if (bearing < 0) {
-      bearing = bearing + 360;
-    } else if (bearing >= 360) {
-      bearing = bearing - 360;
+  void RotateWaypointCW(const int value) {
+    switch (value) {
+    case 90:
+      std::swap(waypointPos.first, waypointPos.second);
+      waypointPos.second *= -1;
+      break;
+    case 180:
+      waypointPos.first *= -1;
+      waypointPos.second *= -1;
+      break;
+    case 270:
+      std::swap(waypointPos.first, waypointPos.second);
+      waypointPos.first *= -1;
+      break;
+    default:
+      throw std::runtime_error("invalid rotation value: " +
+                               std::to_string(value));
     }
+  }
 
-    if (bearing < 90) {
-      heading = kNorth;
-    } else if (bearing < 180) {
-      heading = kEast;
-    } else if (bearing < 270) {
-      heading = kSouth;
-    } else {
-      heading = kWest;
+  void RotateWaypointCCW(const int value) {
+    switch (value) {
+    case 90:
+      std::swap(waypointPos.first, waypointPos.second);
+      waypointPos.first *= -1;
+      break;
+    case 180:
+      waypointPos.first *= -1;
+      waypointPos.second *= -1;
+      break;
+    case 270:
+      std::swap(waypointPos.first, waypointPos.second);
+      waypointPos.second *= -1;
+      break;
+    default:
+      throw std::runtime_error("invalid rotation value: " +
+                               std::to_string(value));
     }
+  }
+
+  const std::string ToString(std::pair<int, int> &pos) const {
+    int south = pos.second < 0 ? abs(pos.second) : 0;
+    int north = pos.second >= 0 ? pos.second : 0;
+    int west = pos.first < 0 ? abs(pos.first) : 0;
+    int east = pos.first >= 0 ? pos.first : 0;
+
+    int manhd = north + south + west + east;
+
+    std::stringstream ss;
+
+    ss << north << "N " << west << "W " << south << "S " << east << "E, manhd "
+       << manhd;
+
+    return ss.str();
   }
 };

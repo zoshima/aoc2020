@@ -23,7 +23,7 @@ void LoadInput() {
 int main() {
   LoadInput();
 
-  Ship ship(kEast);
+  Ship ship;
 
   for (auto &i : input) {
     ship.ProcessInstruction(i.first, i.second);
