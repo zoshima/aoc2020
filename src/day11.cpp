@@ -3,116 +3,105 @@
 #include <string>
 #include <vector>
 
+#include "room.h"
+
 using namespace std;
-using SeatMap = vector<vector<char>>;
 
-constexpr int kNumRows = 97;
-constexpr int kNumCols = 90;
+bool CanTraverse(const Room &room, int x, int y, const int incX,
+                 const int incY) {
+  x += incX;
+  y += incY;
 
-constexpr char kFloor = '.';
-constexpr char kEmptySeat = 'L';
-constexpr char kOccupiedSeat = '#';
+  while (room.IsWithinBounds(x, y)) {
+    const char symbol = room.Get(x, y);
 
-SeatMap input(kNumRows);
+    switch (symbol) {
+    case kEmptySeat:
+      return true;
+      break;
+    case kOccupiedSeat:
+      return false;
+      break;
+    }
 
-void LoadInput() {
-  ifstream file{"../input/day11.txt"};
-  string line;
-
-  for (int i = 0; getline(file, line); i++) {
-    input[i] = vector<char>(line.begin(), line.end());
+    x += incX;
+    y += incY;
   }
 
-  file.close();
+  return true;
 }
 
-inline bool IsOccupied(const SeatMap &spots, int x, int y) {
-  if (x < 0 || x >= kNumCols) {
-    return false; // out of bounds
+int CountOccupiedWithinSight(const Room &room, int x, int y) {
+  int count = 0;
+
+  count += !CanTraverse(room, x, y, 0, -1);  // north
+  count += !CanTraverse(room, x, y, 1, -1);  // northeast
+  count += !CanTraverse(room, x, y, 1, 0);   // east
+  count += !CanTraverse(room, x, y, 1, 1);   // southeast
+  count += !CanTraverse(room, x, y, 0, 1);   // south
+  count += !CanTraverse(room, x, y, -1, 1);  // southwest
+  count += !CanTraverse(room, x, y, -1, 0);  // west
+  count += !CanTraverse(room, x, y, -1, -1); // northwest
+
+  return count;
+}
+
+bool TryUpdate(const Room &pristineRoom, Room &room, int x, int y) {
+  const char symbol = room.Get(x, y);
+
+  if (room.Get(x, y) == kFloor) {
+    return false;
   }
 
-  if (y < 0 || y >= kNumRows) {
-    return false; // out of bounds
-  }
+  int count = CountOccupiedWithinSight(pristineRoom, x, y);
 
-  return spots[y][x] == kOccupiedSeat;
-}
-
-inline int NumOccupiedAdjacent(const SeatMap &spots, int x, int y) {
-  int numOccupied = 0;
-
-  numOccupied += IsOccupied(spots, x - 1, y);     // west
-  numOccupied += IsOccupied(spots, x + 1, y);     // east
-  numOccupied += IsOccupied(spots, x, y - 1);     // north
-  numOccupied += IsOccupied(spots, x, y + 1);     // south
-  numOccupied += IsOccupied(spots, x - 1, y - 1); // northwest
-  numOccupied += IsOccupied(spots, x + 1, y - 1); // northeast
-  numOccupied += IsOccupied(spots, x - 1, y + 1); // southwest
-  numOccupied += IsOccupied(spots, x + 1, y + 1); // southeast
-
-  return numOccupied;
-}
-
-void UpdateState(const SeatMap &spots, int x, int y) {
-  switch (spots[y][x]) {
-  case kFloor:
-    break;
+  switch (symbol) {
   case kEmptySeat:
-    if (!NumOccupiedAdjacent(spots, x, y)) {
-      input[y][x] = kOccupiedSeat;
+    if (count == 0) {
+      room.Set(x, y, kOccupiedSeat);
+      return true;
     }
     break;
   case kOccupiedSeat:
-    if (NumOccupiedAdjacent(spots, x, y) >= 4) {
-      input[y][x] = kEmptySeat;
+    if (count > 4) {
+      room.Set(x, y, kEmptySeat);
+      return true;
     }
     break;
   }
-}
 
-bool Run() {
-  const SeatMap spots = input; // readonly copy
-  bool hasChanged = false;
-
-  for (int y = 0; y < kNumRows; y++) {
-    for (int x = 0; x < kNumCols; x++) {
-      UpdateState(spots, x, y); // uses the copy to update input
-
-      if (spots[y][x] != input[y][x]) {
-        hasChanged = true;
-      }
-    }
-  }
-
-  return hasChanged;
-}
-
-inline void Print() {
-  for (auto& row : input) {
-    for (auto& spot : row) {
-      cout << spot << " ";
-    }
-
-    cout << endl;
-  }
-
-  cout << endl;
+  return false;
 }
 
 int main() {
-  LoadInput();
+  ifstream file("../input/day11.txt");
+  Room room;
+  bool isUpdated = false;
+  int numOccupied = 0;
+  int x, y;
 
-  while (Run()) {}
+  room.Load(file);
 
-  int count = 0;
+  do {
+    Room pristineRoom{room};
+    isUpdated = false;
 
-  for (auto& line : input) {
-    for (auto& spot : line) {
-      count += spot == kOccupiedSeat;
+    for (auto iter = room.begin(); iter != room.end(); ++iter) {
+      tie(x, y) = iter.Position();
+
+      if (TryUpdate(pristineRoom, room, x, y)) {
+        isUpdated = true;
+      }
     }
+
+    /* room.Print(); */
+  } while (isUpdated);
+
+  for (auto iter = room.begin(); iter != room.end(); ++iter) {
+    numOccupied += *iter == kOccupiedSeat;
   }
 
-  cout << count << endl;
+  cout << numOccupied << endl;
 
   return 0;
 }
