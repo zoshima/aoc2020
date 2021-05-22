@@ -23,6 +23,7 @@ add_executable(day8 src/day8.cpp)
 add_executable(day9 src/day9.cpp)
 add_executable(day10 src/day10.cpp)
 add_executable(day11 src/day11.cpp src/room.cpp)
+add_executable(day12 src/day12.cpp)
 
 target_link_libraries(day4 PUBLIC extensions)
 target_link_libraries(day5 PUBLIC algorithms)
