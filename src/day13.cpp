@@ -1,23 +1,17 @@
-#include <iostream>
 #include <fstream>
-#include <array>
-#include <string>
+#include <iostream>
+#include <numeric>
 #include <sstream>
+#include <string>
+#include <vector>
 
 using namespace std;
 
-const int kNumElements = 8; 
-array<int, kNumElements> busIds;
-int minTimestamp;
+vector<int> busIds;
 
 void LoadInput() {
   ifstream file("../input/day13.txt");
   string line;
-  int i = 0;
-
-  getline(file, line);
-
-  minTimestamp = stoi(line);
 
   getline(file, line);
 
@@ -27,9 +21,9 @@ void LoadInput() {
 
   while (getline(ss, line, ',')) {
     if (line != "x") {
-      busIds[i++] = stoi(line);
+      busIds.push_back(stoi(line));
     } else {
-      busIds[i++] = -1;
+      busIds.push_back(1);
     }
   }
 }
@@ -37,9 +31,18 @@ void LoadInput() {
 int main() {
   LoadInput();
 
-  for (auto iter = busIds.begin(); iter != busIds.end(); iter++) {
-    cout << *iter << endl;
+  long ts = busIds[0];
+  long inc = ts;
+
+  for (int i = 1; i < busIds.size(); i++) {
+    while ((ts + i) % busIds[i] != 0) {
+      ts += inc;
+    }
+
+    inc = lcm(busIds[i], inc);
   }
+
+  cout << ts << endl;
 
   return 1;
 }
