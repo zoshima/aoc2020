@@ -1,33 +1,30 @@
 #include <iostream>
-#include <vector>
+#include <unordered_map>
 
 using namespace std;
 
-const int input[] = {1, 12, 0, 20, 8, 16};
-
-int FindLastIndex(vector<int> &v, int val) {
-  for (int i = v.size() - 1; i >= 0; --i) {
-    if (v[i] == val) {
-      return i;
-    }
-  }
-
-  return -1;
-}
+const int kTarget = 30000000 - 1;
+const int kInputSize = 6;
 
 int main() {
-  vector<int> spoken_numbers(begin(input), end(input));
+  unordered_map<int, int> spoken_numbers(
+      {{1, 0}, {12, 1}, {0, 2}, {20, 3}, {8, 4}, {16, 5}});
+
+  auto end = spoken_numbers.end();
+
   int num_spoken = 0; // first spoken after last starting number is always 0
 
-  for (int i = spoken_numbers.size(); i < 2020 - 1; i++) {
-    int index = FindLastIndex(spoken_numbers, num_spoken);
+  for (int i = kInputSize; i < kTarget; ++i) {
+    auto it = spoken_numbers.find(num_spoken);
 
-    spoken_numbers.push_back(num_spoken);
+    if (it != end) {
+      num_spoken = i - it->second;
 
-    if (index == -1) {
-      num_spoken = 0;
+      it->second = i;
     } else {
-      num_spoken = i - index;
+      spoken_numbers.insert({num_spoken, i});
+
+      num_spoken = 0;
     }
   }
 
