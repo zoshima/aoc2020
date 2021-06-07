@@ -1,10 +1,10 @@
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <regex>
 #include <sstream>
 #include <unordered_map>
 #include <vector>
-#include <array>
 
 using namespace std;
 
@@ -112,8 +112,8 @@ const unordered_map<int, vector<vector<int>>> GetValidTickets() {
 }
 
 void PopulateIndices(NumbersArray &ordered_indices,
-               const array<NumbersArray, kNumNumbers> &range_count_map,
-               const int &num_elements, const int target = 1) {
+                     const array<NumbersArray, kNumNumbers> &range_count_map,
+                     const int &num_elements, const int target = 1) {
   if (target > kNumNumbers) {
     return;
   }
@@ -130,7 +130,7 @@ void PopulateIndices(NumbersArray &ordered_indices,
           if (it == ordered_indices.end()) {
             ordered_indices[i] = j;
             break;
-          } 
+          }
         }
       }
     }
