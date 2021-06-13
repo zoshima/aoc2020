@@ -19,7 +19,7 @@ int main() {
     while (file >> noskipws >> c) {
       switch (c) {
         case '#':
-          cube_container.AddActive({x, y, 0});
+          cube_container.AddActive({x, y, 0, 0});
           ++x;
           break;
         case '.':
@@ -43,11 +43,11 @@ int main() {
       const bool is_active = cube_container_snapshot.IsActive(cube);
 
       if (is_active) {
-        if (neighbours.size() != 2 && neighbours.size() != 3) {
+        if (neighbours_size != 2 && neighbours.size() != 3) {
           cube_container.RemoveActive(cube);
         }
       } else {
-        if (neighbours.size() == 3) {
+        if (neighbours_size == 3) {
           cube_container.AddActive(cube);
         }
       }

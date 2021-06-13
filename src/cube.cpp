@@ -1,5 +1,3 @@
-#include <iostream>
-#include <string>
 #include <unordered_set>
 #include <vector>
 
@@ -7,21 +5,22 @@ using namespace std;
 
 namespace Cube {
 struct Cube {
-  int x, y, z;
+  int x, y, z, w;
 
   Cube() {}
-  Cube(int x, int y, int z) : x{x}, y{y}, z{z} {}
+  Cube(int x, int y, int z, int w) : x{x}, y{y}, z{z}, w{w} {}
 
   bool operator==(const Cube &other) const {
-    return this->x == other.x && this->y == other.y && this->z == other.z;
+    return this->x == other.x && this->y == other.y && this->z == other.z &&
+           this->w == other.w;
   }
 
   struct HashFunction {
     size_t operator()(const Cube &cube) const {
-      auto [x, y, z] = cube;
+      auto [x, y, z, w] = cube;
 
-      string hash_string =
-          to_string(x) + "x" + to_string(y) + "y" + to_string(z) + "z";
+      string hash_string = to_string(x) + "x" + to_string(y) + "y" +
+                           to_string(z) + "z" + to_string(w) + "w";
 
       return hash<string>{}(hash_string);
     };
@@ -30,13 +29,14 @@ struct Cube {
 
 class Bounds {
  public:
-  int min_x, min_y, min_z;
-  int max_x, max_y, max_z;
+  int min_x, min_y, min_z, min_w;
+  int max_x, max_y, max_z, max_w;
 
   void Update(const Cube &cube) {
     UpdateValue(cube.x, min_x, max_x);
     UpdateValue(cube.y, min_y, max_y);
     UpdateValue(cube.z, min_z, max_z);
+    UpdateValue(cube.w, min_w, max_w);
   }
 
  private:
@@ -53,7 +53,7 @@ class Bounds {
 
 class CubeContainer {
  public:
-  CubeContainer() : bounds{0, 0, 0, 0, 0, 0} {}
+  CubeContainer() : bounds{0, 0, 0, 0, 0, 0, 0, 0} {}
   CubeContainer(const CubeContainer &other)
       : bounds{other.bounds}, active_cubes{other.active_cubes} {}
 
@@ -76,16 +76,18 @@ class CubeContainer {
     for (int z = cube.z - 1; z <= cube.z + 1; z++) {
       for (int x = cube.x - 1; x <= cube.x + 1; x++) {
         for (int y = cube.y - 1; y <= cube.y + 1; y++) {
-          Cube neighbour{x, y, z};
+          for (int w = cube.w - 1; w <= cube.w + 1; w++) {
+            Cube neighbour{x, y, z, w};
 
-          if (cube == neighbour) {
-            continue;
-          }
+            if (cube == neighbour) {
+              continue;
+            }
 
-          auto it = active_cubes.find(neighbour);
+            auto it = active_cubes.find(neighbour);
 
-          if (it != end) {
-            neighbours.push_back(neighbour);
+            if (it != end) {
+              neighbours.push_back(neighbour);
+            }
           }
         }
       }
@@ -100,7 +102,9 @@ class CubeContainer {
     for (int x = bounds.min_x; x <= bounds.max_x; x++) {
       for (int y = bounds.min_y; y <= bounds.max_y; y++) {
         for (int z = bounds.min_z; z <= bounds.max_z; z++) {
-          grid.push_back({x, y, z});
+          for (int w = bounds.min_w; w <= bounds.max_w; w++) {
+            grid.push_back({x, y, z, w});
+          }
         }
       }
     }
@@ -109,34 +113,6 @@ class CubeContainer {
   }
 
   const size_t ActiveSize() const { return active_cubes.size(); }
-
-  void Print() const {
-    for (int z = bounds.min_z; z <= bounds.max_z; z++) {
-      cout << "z=" << z << endl;
-
-      cout << "\t";
-
-      for (int x = bounds.min_x; x <= bounds.max_x; x++) {
-        cout << x << "\t";
-      }
-
-      cout << endl;
-
-      for (int y = bounds.min_y; y <= bounds.max_y; y++) {
-        cout << y << "\t";
-        for (int x = bounds.min_x; x <= bounds.max_x; x++) {
-          const Cube c{x, y, z};
-          auto it = active_cubes.find(c);
-          cout << (it == active_cubes.end() ? '.' : '#') << "\t";
-        }
-        cout << endl;
-      }
-
-      cout << "\n\n";
-    }
-
-    cout << endl;
-  }
 
  private:
   unordered_set<Cube, Cube::HashFunction> active_cubes;
